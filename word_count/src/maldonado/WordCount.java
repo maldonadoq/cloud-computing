@@ -21,7 +21,7 @@ public class WordCount {
         if (args.length == 0) {
             // System.out.println("Hello World");
             args = new String[1];
-            args[0] = "/home/maldonado/Cloud/data/data1k.txt";
+            args[0] = "/home/maldonado/Cloud/data/data3kkk.txt";
         }
         if (args.length > 0){
             File file = new File(args[0]);
@@ -75,5 +75,6 @@ public class WordCount {
         long timeElapsed = endTime - startTime;
         System.out.println("\nExecution time in milliseconds: " + timeElapsed);
         System.out.println("Execution time in seconds: " + (double)timeElapsed/1000);
+        System.out.println("Execution time in minutes: " + (double)timeElapsed/(1000*60));
     }
 }

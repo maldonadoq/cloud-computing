@@ -36,11 +36,11 @@ def mgenerate(filename, data, count):
 
 	for i in range(count):
 		r = randint(0, msize)
-		f.write(data[r] + " ")
+		f.write(data[r] + "\n")
 		# print(data[r])
 
 	f.close()
 
 if __name__ == "__main__":
 	#mprint(dataset)
-	mgenerate("data/data100kk.txt", dataset, 100000000)
+	mgenerate("data/input.txt", dataset, 10)
