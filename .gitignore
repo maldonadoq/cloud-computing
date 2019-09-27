@@ -1,3 +1,6 @@
+#Mahout csv
+*.csv
+
 # MPI
 *.txt
 
