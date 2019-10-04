@@ -1,6 +1,5 @@
 package maldonado.recommender;
 
-import javafx.util.Pair;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
@@ -12,16 +11,15 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 public class TItemRecommended {
     public static void main(String[] args) throws IOException, TasteException {
         String pathname = "/home/maldonado/Cloud/data/mahout/data.csv";
-        String movies = "/home/maldonado/Cloud/data/mahout/movies.csv";
+        //String movies = "/home/maldonado/Cloud/data/mahout/movies.csv";
 
-        Utils utils = new Utils();
-        HashMap<Long, String> movieList = utils.ReadCsv(movies);
+        //Utils utils = new Utils();
+        //HashMap<Long, String> movieList = utils.ReadCsv(movies);
 
         // Load historical data about user preferences
         DataModel model = new FileDataModel(new File(pathname));
@@ -37,11 +35,11 @@ public class TItemRecommended {
         int rNumber = 5;
 
         List<RecommendedItem> recommendations = recommended.recommend(userID, rNumber);
-        String name;
+        //String name;
 
         for (RecommendedItem recommendation : recommendations) {
-            name = movieList.get(recommendation.getItemID());
-            System.out.println("User " + userID + " might like " + name  + " (preference :"
+            //name = movieList.get(recommendation.getItemID());
+            System.out.println("User " + userID + " might like movie with ID " + recommendation.getItemID() + " (preference :"
                     + recommendation.getValue() + ")");
         }
     }

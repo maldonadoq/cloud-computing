@@ -1,3 +1,6 @@
+#GZ
+*.gz
+
 #Mahout csv
 *.csv
 

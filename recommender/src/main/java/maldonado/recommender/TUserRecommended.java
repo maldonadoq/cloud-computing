@@ -14,16 +14,15 @@ import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 public class TUserRecommended {
     public static void main(String[] args) throws IOException, TasteException {
         String pathname = "/home/maldonado/Cloud/data/mahout/data.csv";
-        String movies = "/home/maldonado/Cloud/data/mahout/movies.csv";
+        //String movies = "/home/maldonado/Cloud/data/mahout/movies.csv";
 
-        Utils utils = new Utils();
-        HashMap<Long, String> movieList = utils.ReadCsv(movies);
+        //Utils utils = new Utils();
+        //HashMap<Long, String> movieList = utils.ReadCsv(movies);
 
         // Load historical data about user preferences
         DataModel model = new FileDataModel(new File(pathname));
@@ -44,11 +43,11 @@ public class TUserRecommended {
         int rNumber = 5;
 
         List<RecommendedItem> recommendations = recommended.recommend(userID, rNumber);
-        String name;
+        // String name;
 
         for (RecommendedItem recommendation : recommendations) {
-            name = movieList.get(recommendation.getItemID());
-            System.out.println("User " + userID + " might like " + name  + " (preference :"
+            //name = movieList.get(recommendation.getItemID());
+            System.out.println("User " + userID + " might like movie with ID " + recommendation.getItemID()  + " (preference :"
                     + recommendation.getValue() + ")");
         }
     }
