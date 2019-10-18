@@ -1,6 +1,9 @@
 #GZ
 *.gz
 
+#Paper
+paper/*
+
 #Mahout csv
 *.csv
 
