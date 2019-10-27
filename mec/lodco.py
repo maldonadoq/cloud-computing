@@ -20,7 +20,7 @@ g0 = pow(10, -4)        # the path-loss constant
 
 
 ## parameter control
-T = 1000                # the number of time slot
+T = 50000                # the number of time slot
 tau_d = 0.002           # execution deadline (in second)
 d = 50                  # the distance between the mobile device and the MEC server (in meter)
 E_min = 0.02e-3         # the minimum amout of battery output energy (in J)
@@ -227,17 +227,55 @@ if __name__ == "__main__":
     plt.plot(np.arange(T), B, linewidth=0.5)
     plt.plot(np.arange(T), np.full(T, theta + E_H_max), linewidth=0.5)
 
-    '''# 2. the average execution cost vs. time slot
+    # 2. the average execution cost vs. time slot
     plt.figure(2)
     plt.title('Evolution of average execution cost')
     plt.xlabel('time slot')
     plt.ylabel('average execution cost')
-    plt.plot(np.arange(T), , linewidth=0.75)
+
+    accumulated = 0
+    avg_cost = np.zeros(T)
+    request_num = 0
+
+    for i in range(T):
+        accumulated += cost[i,2]
+        if(cost[i,2] != 0):
+            request_num += 1
+        
+        avg_cost[i] = accumulated / request_num
+
+    plt.plot(np.arange(T), avg_cost , linewidth=0.75)
 
     # 3. the average ratio of each chosen mode vs. time slot
     plt.figure(3)
     plt.title('Evolution of average ratio of chosen modes')
     plt.xlabel('time slot')
-    plt.ylabel('average ratio of chosen modes')'''
+    plt.ylabel('average ratio of chosen modes')
+    
+    avg_ratio = np.zeros((T,3))
+    mobile_exe = 0.0
+    server_exe = 0.0
+    drop = 0.0
+    request_num = 0.0
+
+    for i in range(1,T):
+        if(cost[i,2] == 0):
+            avg_ratio[i] = avg_ratio[i-1]
+            continue
+        else:
+            request_num += 1
+            if(chosen_mode[i] == 0):
+                mobile_exe += 1
+            elif(chosen_mode[i] == 1):
+                server_exe += 1
+            else:
+                drop += 1
+        
+        avg_ratio[i] = np.array([mobile_exe, server_exe, drop]) / request_num
+
+    plt.plot(np.arange(T), avg_ratio[0:T,0], linewidth=0.75, label = 'Mobile execution')
+    plt.plot(np.arange(T), avg_ratio[0:T,1], linewidth=0.75, label = 'MEC Server execution')
+    plt.plot(np.arange(T), avg_ratio[0:T,2], linewidth=0.75, label = 'Drop')
+    plt.legend()
 
     plt.show()
