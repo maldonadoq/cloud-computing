@@ -20,7 +20,7 @@ g0 = pow(10, -4)        # the path-loss constant
 
 
 ## parameter control
-T = 50000                # the number of time slot
+T = 1000                # the number of time slot
 tau_d = 0.002           # execution deadline (in second)
 d = 50                  # the distance between the mobile device and the MEC server (in meter)
 E_min = 0.02e-3         # the minimum amout of battery output energy (in J)
