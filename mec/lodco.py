@@ -26,26 +26,23 @@ E_min = 0.02e-3         # the minimum amout of battery output energy (in J)
 V = 1e-5                # the weight of penalty (the control parameter introduced by Lyapunov Optimization)
 rho = 0.6               # the probability that the computation task is requested
 
-## the lower bound of perturbation parameter
 E_max_hat = min(max(k * W * np.power(f_max,2), p_tx_max * tau), E_max)
 theta = E_max_hat + V*phi/E_min
 
-## allocate storage
-B = np.zeros(T)             # the battery energy level (in J)
-B_hat = np.zeros(T)         # the virtual battery energy level ($B_hat = B - theta$)
+## storage
+B = np.zeros(T)             # the battery energy level
+B_hat = np.zeros(T)         # the virtual battery energy level
 e = np.zeros(T)             # the amout of the harvested and stored energy (in J)
-chosen_mode = np.zeros(T)   # {1: local, 2: remote, 3: drop, 4: no task request}
-f = np.zeros(T)             # the CPU-cycle frequency of local execution (in Hz)
-p = np.zeros(T)             # the transmit power of computation offloading (in W)
-cost = np.zeros((T, 3))     # execution delay for mobile execution, MEC server execution and final choice, respectively (in second)
-E = np.zeros((T, 3))        # energy consumption for mobile execution, MEC server execution and final choice, respectively (in J)
+chosen_mode = np.zeros(T)   # {0: local, 1: remote, 2: drop, 3: no task request}
+f = np.zeros(T)             # the CPU-cycle frequency of local execution
+p = np.zeros(T)             # the transmit power of computation offloading
+cost = np.zeros((T, 3))
+E = np.zeros((T, 3))
 
 if __name__ == "__main__":
     
     t = 0
     while(t < T-1):
-        #print('\n[time slot: ', t, ']')
-
         # generative the task request
         zeta = np.random.binomial(1, rho)
         # generative the virtual battery level
@@ -60,11 +57,9 @@ if __name__ == "__main__":
         # step 2: get optimal computation offloading strategy
         if(zeta == 0):
             # chosen mode has to be 3
-            #print(' no task request generated')
             chosen_mode[t] = 3
         else:
             # chosen_mode is chosen from [0,1,2]
-            #print(' task request generated')
             # channel power
             h = np.random.exponential(g0 / np.power(d, 4))
 
@@ -75,12 +70,11 @@ if __name__ == "__main__":
 
             if(f_L <= f_U):
                 # the sub-problem is feasible
-                #print('  mobile execution P_ME is feasible')
 
                 if(B_hat[t] < 0):
                     f_0 = np.power(V / (-2 * B_hat[t] * k), 1/3)
                 else:
-                    # complex number may exist
+                    # complex number
                     f_0 = -np.power(V / (2 * B_hat[t] * k), 1/3)
                 
                 if((B_hat[t] >= 0) or ((B_hat[t] < 0) and (f_0 > f_U))):
@@ -102,22 +96,11 @@ if __name__ == "__main__":
                 J_m = -B_hat[t] * k * W * np.power(f[t], 2) + V * W / f[t]
 
             else:
-                # the sub-problem is not fasible because (i) the limited 
-                # computation capacity or (ii) time cosumed out of deadline or 
-                # (iii) the energy consumed out of battery energy level
-                # If it is not feasible, it just means that we cannot choose 
-                # 'I_m=1'. It dosen't mean that the task has to be dropped.
-                #print('  mobile execution P_ME is not feasible!')
+                # the sub-problem is not fasible
                 f[t] = 0
                 cost[t, 0] = 0
                 E[t, 0] = 0
-
-                # 'I_m=1' can never be chosen if mobile execution goal is inf
                 J_m = np.inf
-        
-            # Attention! We do not check whether the energy cunsumed is larger than
-            # battery energy level because the problem J_CO does
-            # not have constraint (8).
 
             # step 2.2: solve the optimization problem P_SE  p[t] > 0
             E_tmp = sigma * L * np.log(2) / (omega * h)
@@ -143,7 +126,6 @@ if __name__ == "__main__":
 
             if(p_L <= p_U):
                 # the sub-problem is feasible
-                #print('  MEC server exec P_SE is feasible')
                 # calculate p_0
                 vir_bat = B_hat[t]
                 
@@ -169,20 +151,11 @@ if __name__ == "__main__":
                 J_s = (-B_hat[t] * p[t] + V) * cost[t,1]
 
             else:
-                # the sub-problem is not feasible because (i) the limited transmit 
-                # power or (ii) time cosumed out of deadline or (iii) the energy 
-                # consumed out of battery energy level
-                # If it is not feasible, it just means that we cannot choose 
-                # 'I_s=1'. It dosen't mean that the task has to be dropped.
-                #print('  MEC server execution P_SE is not feasible!')
+                # the sub-problem is not feasible because
                 p[t] = 0
                 cost[t, 1] = 0
                 E[t, 1] = 0
-                # 'I_s=1' can never be chosen if MEC server execution goal is inf
                 J_s = np.inf
-            # Similarly, we do not check whether the energy cunsumed is larger than
-            # battery energy level because the problem $\mathcal{J}_{CO}$ does
-            # not have constraint (8).
 
             # step 3: choose the best execution mode
             J_d = V * phi
@@ -217,9 +190,8 @@ if __name__ == "__main__":
         t += 1
     
 
-    # step 6: evaluate the simulation results
-    # 1. the battery energy level vs. time slot
 
+    # 1. the battery energy level vs. time slot
     plt.figure(1)
     plt.title('Evolution of battery energy level')
     plt.xlabel('time slot')
