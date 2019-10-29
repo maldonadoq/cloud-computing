@@ -18,7 +18,6 @@ E_H_max = 48e-6         # the upper bound of the energy arrive at the mobile dev
 p_H = E_H_max/(2*tau)   # the average Energy Harvesting (EH) power (in W)
 g0 = pow(10, -4)        # the path-loss constant
 
-
 ## parameter control
 T = 1000                # the number of time slot
 tau_d = 0.002           # execution deadline (in second)
@@ -28,10 +27,10 @@ V = 1e-5                # the weight of penalty (the control parameter introduce
 rho = 0.6               # the probability that the computation task is requested
 
 ## the lower bound of perturbation parameter
-E_max_hat = min(max(k * W * pow(f_max,2), p_tx_max * tau), E_max)
+E_max_hat = min(max(k * W * np.power(f_max,2), p_tx_max * tau), E_max)
 theta = E_max_hat + V*phi/E_min
 
-## allocate storage for valuable results
+## allocate storage
 B = np.zeros(T)             # the battery energy level (in J)
 B_hat = np.zeros(T)         # the virtual battery energy level ($B_hat = B - theta$)
 e = np.zeros(T)             # the amout of the harvested and stored energy (in J)
@@ -60,15 +59,16 @@ if __name__ == "__main__":
 
         # step 2: get optimal computation offloading strategy
         if(zeta == 0):
-            # chosen mode has to be 4
+            # chosen mode has to be 3
             #print(' no task request generated')
             chosen_mode[t] = 3
         else:
             # chosen_mode is chosen from [0,1,2]
             #print(' task request generated')
-            h = np.random.exponential(g0 / pow(d, 4))
+            # channel power
+            h = np.random.exponential(g0 / np.power(d, 4))
 
-            # step 2.1: solve the optimization problem
+            # step 2.1: solve the optimization problem P_ME
             # calculate f_L and f_U
             f_L = max(np.sqrt(E_min/(k*W)), W/tau_d)
             f_U = min(np.sqrt(E_max/(k*W)), f_max)
@@ -78,28 +78,28 @@ if __name__ == "__main__":
                 #print('  mobile execution P_ME is feasible')
 
                 if(B_hat[t] < 0):
-                    f_0 = pow(V / (-2 * B_hat[t] * k), 1/3)
+                    f_0 = np.power(V / (-2 * B_hat[t] * k), 1/3)
                 else:
                     # complex number may exist
-                    f_0 = -pow(V / (2 * B_hat[t] * k), 1/3)
+                    f_0 = -np.power(V / (2 * B_hat[t] * k), 1/3)
                 
-                if(((f_0 > f_U) and (B_hat[t] < 0)) or (B_hat[t] >= 0)):
+                if((B_hat[t] >= 0) or ((B_hat[t] < 0) and (f_0 > f_U))):
                     f[t] = f_U
-                elif((f_0 >= f_L) and (f_0 <= f_U) and (B_hat[t] < 0)):
+                elif((B_hat[t] < 0) and (f_L <= f_0) and (f_0 <= f_U)):
                     f[t] = f_0
-                elif((f_0 < f_L) and (B_hat[t] < 0)):
+                elif((B_hat[t] < 0) and (f_0 < f_L)):
                     f[t] = f_L
 
                 # check if f[t] is zero
                 if(f[t] == 0):
-                    print('   something wrong! f is 0')
+                    print('   something wrong! f is 0  [ME]')
 
                 # calculate the delay of mobile exec
                 cost[t,0] = W / f[t]
                 # calculate the energy consumption of mobile exec
-                E[t,0] = k * W * pow(f[t], 2)
+                E[t,0] = k * W * np.power(f[t], 2)
                 # calculate the value of optimization goal
-                J_m = -B_hat[t] * k * W * pow(f[t], 2) + V * W / f[t]
+                J_m = -B_hat[t] * k * W * np.power(f[t], 2) + V * W / f[t]
 
             else:
                 # the sub-problem is not fasible because (i) the limited 
@@ -145,21 +145,21 @@ if __name__ == "__main__":
                 # the sub-problem is feasible
                 #print('  MEC server exec P_SE is feasible')
                 # calculate p_0
-                virtual_battery = B_hat[t]
+                vir_bat = B_hat[t]
                 
-                y = lambda x: virtual_battery * np.log2(1 + h*x/sigma) + h * (V - virtual_battery*x) /(np.log(2) * (sigma + h*x))
+                y = lambda x: vir_bat * np.log2(1 + h*x/sigma) + h*(V - vir_bat*x) /(np.log(2) * (sigma + h*x))
                 p_0 = fsolve(y, 0.5)
 
-                if(((p_U < p_0) and (B_hat[t] < 0)) or (B_hat[t] >= 0)):
+                if((B_hat[t] >= 0) or ((B_hat[t] < 0) and (p_U < p_0))):
                     p[t] = p_U
-                elif((p_0 < p_L) and B_hat[t] < 0):
+                elif((B_hat[t] < 0) and (p_L > p_0)):
                     p[t] = p_L
-                elif((p_0 >= p_L) and (p_0 <= p_U) and (B_hat[t] <0)):
+                elif((B_hat[t] <0) and (p_L <= p_0) and (p_0 <= p_U)):
                     p[t] = p_0
 
                 # check wheter p[t] is zero
                 if(p[t] == 0):
-                    print('   something wrong! p is 0')
+                    print('   something wrong! p is 0  [SE]')
                 
                 # calculate the delay of MEC server exec
                 cost[t,1] = L / (omega * np.log2(1 + (h * p[t] / sigma)))
