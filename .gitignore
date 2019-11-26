@@ -1,3 +1,9 @@
+#Terraform
+/terraform/terraform-maldonado.json 
+*.tfstate
+.terraform
+*.tfstate.backup
+
 #GZ
 *.gz
 
