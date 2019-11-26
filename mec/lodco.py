@@ -122,7 +122,7 @@ if __name__ == "__main__":
                 # calculate p_E max
                 y = lambda x: x * L - omega * np.log2(1 + (h * x) / sigma) * E_max
                 p_E_max = fsolve(y,100)
-                p_U = max(p_tx_max, p_E_max)
+                p_U = min(p_tx_max, p_E_max)
 
             if(p_L <= p_U):
                 # the sub-problem is feasible
